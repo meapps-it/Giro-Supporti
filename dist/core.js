@@ -8,3 +8,5 @@ export function rows(r){return [...new Set(r.steps.map(s=>s.mp))].map(mp=>({mp,.
 export function recent(rs,now=new Date()){let cutoff=new Date(now);cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-6);return rs.filter(r=>r.end&&new Date(r.end)>=cutoff).sort((a,b)=>new Date(b.end)-new Date(a.end));}
 export function quantities(text){const found=[];for(const line of text.split('\n')){const m=line.match(/(?:qt[aàá.]|quantit[aà])[\s.:|]*(\d[\d .]*)/i);if(m){const q=m[1].replace(/\D/g,'');if(q)found.push(q);}}return found;}
 export function parsePaper(text){return text.split('\n').map(l=>{let m=l.trim().match(/^(\d{3,5})\s+[|]?\s*(\d+|-)\s+[|]?\s*(\d+(?:\s*\+\s*\d+)*)\s*(.*)$/);return m?{mp:m[1],b:m[2]==='-'?'':m[2],k:m[3].replace(/\s/g,''),note:m[4]}:null;}).filter(Boolean);}
+
+export function previousShift(d=new Date()){const current=detected(d).shift;const end=new Date(d);end.setHours(current==='Mattino'?6:current==='Pomeriggio'?14:22,0,0,0);if(end>d)end.setDate(end.getDate()-1);return {shift:current==='Mattino'?'Notte':current==='Pomeriggio'?'Mattino':'Pomeriggio',end,type:'Fine turno'};}
