@@ -1,0 +1,10 @@
+export const INITIAL='K461 K438 K312 K313 K402 K443 K350 K326 K346 B346 K461 B461 K443 B443 K307 B307 K306 B306 K313 B313 K312 B312 K438 K402 K350 K326 B438 B402 B326 B350 K486'.split(' ').map((v,i)=>({id:'s'+i,mp:v.slice(1),type:v[0],enabled:true,category:'AUTO'}));
+export function sum(s){if(!/^\d+(\s*\+\s*\d+)*$/.test(s.trim()))throw Error('Usa quantità intere positive o zero, separate da +.');const n=s.split('+').reduce((a,b)=>a+Number(b),0);if(!Number.isSafeInteger(n))throw Error('Quantità troppo grande');return n;}
+export function detected(d=new Date()){let h=d.getHours()+d.getMinutes()/60;let shift=h>=6&&h<14?'Mattino':h>=14&&h<22?'Pomeriggio':'Notte';let start=shift==='Mattino'?6:shift==='Pomeriggio'?14:22;let elapsed=(h-start+24)%24;return {shift,type:elapsed<=2?'Inizio turno':elapsed>=6?'Fine turno':'Inizio turno',outside:elapsed>2&&elapsed<6};}
+export const blank=()=>({b:null,pallets:[],flag:'',stopped:false,note:''});
+export function newRound(seq,meta){return {id:crypto.randomUUID(),...meta,end:null,modified:null,steps:seq.filter(s=>s.enabled).map(s=>({...s,status:'todo'})),data:Object.fromEntries(seq.map(s=>[s.mp,blank()])),index:0};}
+export function status(r,s){if(s.status==='skipped')return 'Saltata';const d=r.data[s.mp];return (s.type==='K'?d.pallets.length>0:d.b!==null)?'Compilata':'Da fare';}
+export function rows(r){return [...new Set(r.steps.map(s=>s.mp))].map(mp=>({mp,...r.data[mp]}));}
+export function recent(rs,now=new Date()){let cutoff=new Date(now);cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-6);return rs.filter(r=>r.end&&new Date(r.end)>=cutoff).sort((a,b)=>new Date(b.end)-new Date(a.end));}
+export function quantities(text){const found=[];for(const line of text.split('\n')){const m=line.match(/(?:qt[aàá.]|quantit[aà])[\s.:|]*(\d[\d .]*)/i);if(m){const q=m[1].replace(/\D/g,'');if(q)found.push(q);}}return found;}
+export function parsePaper(text){return text.split('\n').map(l=>{let m=l.trim().match(/^(\d{3,5})\s+[|]?\s*(\d+|-)\s+[|]?\s*(\d+(?:\s*\+\s*\d+)*)\s*(.*)$/);return m?{mp:m[1],b:m[2]==='-'?'':m[2],k:m[3].replace(/\s/g,''),note:m[4]}:null;}).filter(Boolean);}
